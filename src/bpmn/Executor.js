@@ -13,7 +13,7 @@
 
 "use strict";
 
-var CAM = {};
+CAM = {};
 
 /**
  * The core process engine.
