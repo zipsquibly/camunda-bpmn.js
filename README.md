@@ -1,4 +1,4 @@
-camunda-bpmn.js
+camunda-bpmn.js : Super-charged for Node.js
 ==========
 
 camunda BPMN Javascript libraries for parsing, executing and rendering BPMN 2.0 with Java Script. 
