@@ -13,6 +13,7 @@
 
 "use strict";
 
+// CAM is used as a global variable so don't make it var
 CAM = {};
 
 /**
@@ -234,7 +235,7 @@ CAM = {};
       if (definitionId) {
         for (var index in this.activityExecutions) {
           var execution = this.activityExecutions[index];
-          if (execution.activityDefinition.id == definitionId) {
+          if (execution.activityDefinition.id == definitionId && !execution.isEnded) {
             signalFn(execution);
             break;
           }
