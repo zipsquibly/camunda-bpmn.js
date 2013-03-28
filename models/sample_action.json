@@ -1,0 +1,9 @@
+    { "activityId" : "7f344a50-97bd-11e2-8421-331891336a3f",
+       "actionDateTime" : "1994-11-05T08:15:30-05:00",
+       "activityType" : "userTask",
+       "actionType": "take",
+       "user" : {
+           "id" : "875cf78c-97c1-11e2-98e9-ef7ab57025cc",
+           "name" : "John Smith, MD"
+       }
+     }

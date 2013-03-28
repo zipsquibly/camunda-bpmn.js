@@ -1,0 +1,46 @@
+{
+    "type":"object",
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "id": "#",
+    "required":false,
+    "properties":{
+        "actionDateTime": {
+            "type":"string",
+            "id": "actionDateTime",
+            "required":false
+        },
+        "actionType": {
+            "type":"string",
+            "id": "actionType",
+            "required":false
+        },
+        "activityId": {
+            "type":"string",
+            "id": "activityId",
+            "required":false
+        },
+        "activityType": {
+            "type":"string",
+            "id": "activityType",
+            "required":false
+        },
+        "user": {
+            "type":"object",
+            "id": "user",
+            "required":false,
+            "properties":{
+                "id": {
+                    "type":"string",
+                    "id": "id",
+                    "required":false
+                },
+                "name": {
+                    "type":"string",
+                    "id": "name",
+                    "required":false
+                }
+            }
+        }
+    }
+}
+

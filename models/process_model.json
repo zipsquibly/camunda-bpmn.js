@@ -1,0 +1,160 @@
+{
+    "type":"object",
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "id": "#",
+    "required":false,
+    "properties":{
+        "active": {
+            "type":"boolean",
+            "id": "active",
+            "required":false
+        },
+        "bpmnSourceURI": {
+            "type":"string",
+            "id": "bpmnSourceURI",
+            "required":false
+        },
+        "context": {
+            "type":"object",
+            "id": "context",
+            "required":false,
+            "properties":{
+                "documentId": {
+                    "type":"string",
+                    "id": "documentId",
+                    "required":false
+                },
+                "patientId": {
+                    "type":"string",
+                    "id": "patientId",
+                    "required":false
+                },
+                "personId": {
+                    "type":"string",
+                    "id": "personId",
+                    "required":false
+                },
+                "userId": {
+                    "type":"string",
+                    "id": "userId",
+                    "required":false
+                },
+                "visitId": {
+                    "type":"string",
+                    "id": "visitId",
+                    "required":false
+                }
+            }
+        },
+        "currentState": {
+            "type":"object",
+            "id": "currentState",
+            "required":false,
+            "properties":{
+                "pendingActivities": {
+                    "type":"array",
+                    "id": "pendingActivities",
+                    "required":false,
+                    "items":
+                        {
+                            "type":"object",
+                            "id": "0",
+                            "required":false,
+                            "properties":{
+                                "activityId": {
+                                    "type":"string",
+                                    "id": "activityId",
+                                    "required":false
+                                }
+                            }
+                        }
+                    
+
+                }
+            }
+        },
+        "description": {
+            "type":"string",
+            "id": "description",
+            "required":false
+        },
+        "endDateTime": {
+            "type":"string",
+            "id": "endDateTime",
+            "required":false
+        },
+        "history": {
+            "type":"array",
+            "id": "history",
+            "required":false,
+            "items":
+                {
+                    "type":"object",
+                    "id": "0",
+                    "required":false,
+                    "properties":{
+                        "actionDateTime": {
+                            "type":"string",
+                            "id": "actionDateTime",
+                            "required":false
+                        },
+                        "actionType": {
+                            "type":"string",
+                            "id": "actionType",
+                            "required":false
+                        },
+                        "activityId": {
+                            "type":"string",
+                            "id": "activityId",
+                            "required":false
+                        },
+                        "activityType": {
+                            "type":"string",
+                            "id": "activityType",
+                            "required":false
+                        },
+                        "user": {
+                            "type":"object",
+                            "id": "user",
+                            "required":false,
+                            "properties":{
+                                "id": {
+                                    "type":"string",
+                                    "id": "id",
+                                    "required":false
+                                },
+                                "name": {
+                                    "type":"string",
+                                    "id": "name",
+                                    "required":false
+                                }
+                            }
+                        }
+                    }
+                }
+            
+
+        },
+        "id": {
+            "type":"string",
+            "id": "id",
+            "required":false
+        },
+        "lastActionDateTime": {
+            "type":"string",
+            "id": "lastActionDateTime",
+            "required":false
+        },
+        "name": {
+            "type":"string",
+            "id": "name",
+            "required":false
+        },
+        "startDateTime": {
+            "type":"string",
+            "id": "startDateTime",
+            "required":false
+        }
+    }
+}
+
