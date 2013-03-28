@@ -11,18 +11,26 @@ camunda BPMN Javascript libraries for parsing, executing and rendering BPMN 2.0 
 Node Server
 ---------
 This fork is to implement a node bpmn server, using REST and Socket.IO.
+
+
 **REST**
+
 * *Create A Process* - this will create a new process. Post a process object to the processes collection
+
 ```
 POST /processes/
 ```
 * *Get a process* - returns the process object
+
 ```
 GET /processes/{process-id}/
+
 ```
 * *Search all processes* - get all or specific processes. Use process model attributes in your query string.
+
 ```
 GET /processes
+
 example GET /processes?processId=74886dba-97c8-11e2-bd89-0baa2afabdfe
 ```
 
