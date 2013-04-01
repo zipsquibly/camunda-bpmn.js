@@ -12,7 +12,8 @@
     "requirejs": "~2.1.5",
     "xmldom": "~0.1.13",
     "chai": "~1.5.0",
-    "restify": "~2.3.5"
+    "restify": "~2.3.5",
+    "bunyan": "~0.20.0"
   },
   "scripts": {
     "test": "mocha --reporter spec tests"
