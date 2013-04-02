@@ -396,6 +396,9 @@ CAM = {};
 
   var startEvent = {
     "execute" : function(activityExecution) {
+      // wait state
+    },
+    "signal" : function(activityExecution) {
       leave(activityExecution);
     }
   };
@@ -429,6 +432,9 @@ CAM = {};
 
   var serviceTask = {
     "execute" : function(activityExecution) {
+      // wait state
+    },
+    "signal" : function(activityExecution) {
       leave(activityExecution);
     }
   };

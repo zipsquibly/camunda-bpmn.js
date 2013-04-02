@@ -2,8 +2,8 @@
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:signavio="http://www.signavio.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" exporter="Signavio Process Editor, http://www.signavio.com" exporterVersion="6.7.0" expressionLanguage="http://www.w3.org/1999/XPath" id="sid-338cc59d-3e6b-4179-8742-9c92cfb4b0dd" targetNamespace="http://www.omg.org/spec/BPMN/20100524/MODEL" typeLanguage="http://www.w3.org/2001/XMLSchema" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
   <process id="numberGuess" isExecutable="true">
     <startEvent id="start"> </startEvent>
-    <serviceTask id="generateNumber" isForCompensation="false" name="Generate random &#10;number" startQuantity="1"> </serviceTask>
-    <exclusiveGateway gatewayDirection="Diverging" id="exclusiveGW" name="Guess &#10;Correct?"> </exclusiveGateway>
+    <serviceTask id="generateNumber" isForCompensation="false" name="Generate random number" startQuantity="1"> </serviceTask>
+    <exclusiveGateway gatewayDirection="Diverging" id="exclusiveGW" name="Guess Correct?"> </exclusiveGateway>
     <userTask id="guessNumber" isForCompensation="false" name="Guess Number" startQuantity="1"> </userTask>
     <endEvent id="end" name="You win!"> </endEvent>
     <sequenceFlow id="sid-CBA9A05E-AC41-43F8-991A-C965DDB0C45F" sourceRef="start" targetRef="generateNumber"> </sequenceFlow>

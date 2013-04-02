@@ -96,10 +96,15 @@ io.sockets.on('connection', function (socket) {
   socket.on('sub-process', function (subData) {
     var listenerId = processStore.addProcessEventListener(subData.processId, function (eventType, event) {
       // if (event.activityDefinition.sequenceFlows) console.log(util.inspect(event.activityDefinition.sequenceFlows[0], { depth : 8 }));
-      console.log()
+      // console.log(util.inspect(event, { depth : 4 }));
       var data = {
+        eventType : eventType,
+        activityType: event.activityDefinition.type,
+        activityName: event.activityDefinition.name,
         activityDefinitionId : event.activityDefinition.id,
-        incomingSequenceFlowId : event.incomingSequenceFlowId
+        incomingSequenceFlowId : event.incomingSequenceFlowId,
+        startDateTime: event.startDate,
+        endDateTime: event.endDate
       };
       if (subData.eventType === undefined || subData.eventType == "all" || subData.eventType == eventType) {
         if (subData.activityDefinitionId === undefined || subData.activityDefinitionId == "all" || 
@@ -149,10 +154,9 @@ server.get({path: '/processes/:processId', name: 'getProcessById'}, function(req
 });
 
 server.post({path: '/processes/:processId/signal', name: 'signalProcess'}, function(req, res, next) {
-  console.log(util.inspect(req.params));
   var processObject = processStore.getProcess(req.params.processId);
   var signal = req.body;
-  processObject.signal(signal.activityDefinitionId);
+  processObject.signal(signal.activityDefinitionId, signal.data);
   res.send(signal);  
 });
 server.listen(8080, function() {
@@ -223,15 +227,13 @@ function createProcess(processXml, processObject, cb) {
       },
       {
          id : "generateNumber",
-         "start" : function (execution) {
-              execution.parentExecution.variables.secret = Math.floor(Math.random() * 5) + 1;
+         "end" : function (execution) {
               console.log("Secret is " + execution.parentExecution.variables.secret);
          }
       },
       {
          id : "guessNumber",
-         "take" : function (execution) {
-              execution.parentExecution.variables.guess = Math.floor(Math.random() * 5) + 1;
+         "end" : function (execution) {
               console.log("Guess is " + execution.parentExecution.variables.guess);
          }
       },
@@ -239,12 +241,16 @@ function createProcess(processXml, processObject, cb) {
          id : "end",
          "end" : function (execution) {
            console.log("COMPLETE");
-           win = true;
          }
       }
     ]);
 
-    processObject.signal = function (activityDefinitionId) {
+    processObject.signal = function (activityDefinitionId, data) {
+      if (data) {
+        for (var property in data) {
+          instance.variables[property] = data[property];
+        }
+      }
       instance.signal(activityDefinitionId);
     };
 

@@ -42,7 +42,11 @@ socket.on("connect", function () {
       });
     socket.emit("sub-process", {
         processId: processObject.id,
-        activityDefinitionId: "guessNumber",
+        activityDefinitionId: "end",
+        eventType: "end" 
+      });
+    socket.emit("sub-process", {
+        processId: processObject.id,
         eventType: "start" 
       });
   });
@@ -54,11 +58,7 @@ describe('Manage a process', function(){
     var newId = null;
     it('should create a valid process when I post', function(done){
       client.post("/processes", processObject, function(err, req, res, obj) {
-        if (err) {
-          throw(err);
-        }
-        // console.log("Got response: " + res.statusCode);
-        // console.log("Got response: " + util.inspect(obj));
+        if (err) throw(err);
         expect(res.statusCode).to.equal(200);
         expect(obj.id).to.not.equal(null);
         newId = obj.id;
@@ -67,11 +67,7 @@ describe('Manage a process', function(){
     });
     it('should find the process I just created', function(done){
       client.get("/processes/" + newId, function(err, req, res, obj) {
-        if (err) {
-          throw(err);
-        }
-        // console.log("Got response: " + res.statusCode);
-        // console.log("Got response: " + util.inspect(obj));
+        if (err) throw(err);
         expect(res.statusCode).to.equal(200);
         expect(obj.id).to.equal(newId);
         done();
@@ -82,30 +78,35 @@ describe('Manage a process', function(){
       var se = newProcessEvents.pop();
       expect(newId).to.equal(se.id);     
     });
-    it('should get some process events when the process is signaled', function (done) {
-      var signal = { "activityDefinitionId" : "guessNumber" };
+    it('should get some process events when the process is started', function (done) {
+      var signal = { "activityDefinitionId" : "start" };
       client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
+        if (err) throw(err);
         expect(res.statusCode).to.equal(200);
         assert(allProcessEvents.length > 0, "Did not receive process events");
         done();
       });
     });
-    it('should end if we keep signaling it to guess numbers', function (done) {
-      var signal = { "activityDefinitionId" : "guessNumber" };
-      socket.emit("sub-process", {
-        processId: newId,
-        activityDefinitionId: "end",
-        eventType: "end" 
+    it('should send the process its secret number', function (done) {
+      var signal = { "activityDefinitionId" : "generateNumber", "data" : { "secret" : Math.floor(Math.random() * 20) + 1} };
+      client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
+        if (err) throw(err);
+        expect(res.statusCode).to.equal(200);
+        done();
       });
+    });
+    it('should end if we keep signaling it to guess numbers', function (done) {
       var sigIt = function () {
+        var signal = { "activityDefinitionId" : "guessNumber", "data" : { "guess" : Math.floor(Math.random() * 20) + 1} };
         client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
+          if (err) throw(err);
           expect(res.statusCode).to.equal(200);
         });
       };
       socket.on("process-event", function (processEvent) {
         if (processEvent.activityDefinitionId == "guessNumber") {
           sigIt();
-        } else if (processEvent.activityDefinitionId == "end") {
+        } else if (processEvent.eventType == "end" && processEvent.activityDefinitionId == "end") {
           done();
         }
       }); 
