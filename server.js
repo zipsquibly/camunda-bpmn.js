@@ -85,15 +85,15 @@ server.pre(function (request, response, next) {
 //// Socket.IO SETUP ///////
 var io = socketio.listen(server);
 io.sockets.on('connection', function (socket) {
-  socket.on('sub-new-processes', function (data) {
+  socket.on('subscribe-new-process-events', function (data) {
     var listenerId = processStore.addNewProcessListener(function (processObject) {
-      socket.emit('new-process', processObject);
+      socket.emit('new-process-event', processObject);
     });
     socket.on('disconnect', function () {
       processStore.removeNewProcessListener(listenerId);
     });
   });
-  socket.on('sub-process', function (subData) {
+  socket.on('subscribe-process-events', function (subData) {
     var listenerId = processStore.addProcessEventListener(subData.processId, function (eventType, event) {
       // if (event.activityDefinition.sequenceFlows) console.log(util.inspect(event.activityDefinition.sequenceFlows[0], { depth : 8 }));
       // console.log(util.inspect(event, { depth : 4 }));
@@ -116,12 +116,6 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function () {
       processStore.removeProcessEventListener(subData.processId, listenerId);
     });
-  });
-  socket.on('attach-listener', function (data) {
-
-  });
-  socket.on('disconnect', function () {
-
   });
 });
 

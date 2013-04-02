@@ -34,18 +34,18 @@ var socket = io.connect(HOST);
 var newProcessEvents = [];
 var allProcessEvents = [];
 socket.on("connect", function () {
-  socket.emit("sub-new-processes", {});
-  socket.on("new-process", function (processObject) {
+  socket.emit("subscribe-new-process-events", {});
+  socket.on("new-process-event", function (processObject) {
     newProcessEvents.push(processObject);
     socket.on("process-event", function (processEvent) {
         allProcessEvents.push(processEvent);
       });
-    socket.emit("sub-process", {
+    socket.emit("subscribe-process-events", {
         processId: processObject.id,
         activityDefinitionId: "end",
         eventType: "end" 
       });
-    socket.emit("sub-process", {
+    socket.emit("subscribe-process-events", {
         processId: processObject.id,
         eventType: "start" 
       });
