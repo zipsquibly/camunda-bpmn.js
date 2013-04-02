@@ -102,7 +102,10 @@ io.sockets.on('connection', function (socket) {
         incomingSequenceFlowId : event.incomingSequenceFlowId
       };
       if (subData.eventType === undefined || subData.eventType == "all" || subData.eventType == eventType) {
-        socket.emit('process-event', data);
+        if (subData.activityDefinitionId === undefined || subData.activityDefinitionId == "all" || 
+          subData.activityDefinitionId == event.activityDefinition.id) {
+            socket.emit('process-event', data);
+        }
       }
     });
     socket.on('disconnect', function () {

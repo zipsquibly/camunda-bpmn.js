@@ -42,6 +42,7 @@ socket.on("connect", function () {
       });
     socket.emit("sub-process", {
         processId: processObject.id,
+        activityDefinitionId: "guessNumber",
         eventType: "start" 
       });
   });
@@ -91,6 +92,11 @@ describe('Manage a process', function(){
     });
     it('should end if we keep signaling it to guess numbers', function (done) {
       var signal = { "activityDefinitionId" : "guessNumber" };
+      socket.emit("sub-process", {
+        processId: newId,
+        activityDefinitionId: "end",
+        eventType: "end" 
+      });
       var sigIt = function () {
         client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
           expect(res.statusCode).to.equal(200);
