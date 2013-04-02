@@ -3,7 +3,7 @@
   "description" : "Number Guessing",
   "active" : true,
   "name" : "number-guess",
-  "bpmnSourceURI" : "https://raw.github.com/zipsquibly/camunda-bpmn.js/master/test/resources/event-based-events.bpmn",
+  "bpmnSourceURI" : "https://raw.github.com/zipsquibly/camunda-bpmn.js/master/test/resources/number-guess.bpmn",
   "startDateTime" : "1994-11-05T08:15:30-05:00",
   "endDateTime" : "1994-11-05T08:15:30-05:00",
   "lastActionDateTime" : "1994-11-05T08:15:30-05:00",
