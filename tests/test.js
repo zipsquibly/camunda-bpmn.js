@@ -31,12 +31,16 @@ var client = restify.createJsonClient({
 });
 
 var socket = io.connect(HOST);
-var socketEvents = [];
+var newProcessEvents = [];
+var allProcessEvents = [];
 socket.on("connect", function () {
   socket.emit("sub-new-processes", {});
-  socket.on("new-process", function (data) {
-    // console.log("new-process: " + util.inspect(data));
-    socketEvents.push(data);
+  socket.on("new-process", function (processObject) {
+    newProcessEvents.push(processObject);
+    socket.on("process-event", function (processEvent) {
+      allProcessEvents.push(processEvent);
+    });
+    socket.emit("sub-process", processObject);
   });
 });
 
@@ -70,9 +74,15 @@ describe('Manage a process', function(){
       });
     });
     it('should get a socket event for a new process', function(){
-      expect(socketEvents.length).to.equal(1);
-      var se = socketEvents.pop();
+      expect(newProcessEvents.length).to.equal(1);
+      var se = newProcessEvents.pop();
       expect(newId).to.equal(se.id);     
+    });
+    it('should get some process events', function (done) {
+      setTimeout(function () {
+        assert(allProcessEvents.length > 0, "Did not receive process events");
+        done();
+      }, 1000);
     });
   });
 });
