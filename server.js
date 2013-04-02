@@ -86,8 +86,11 @@ server.pre(function (request, response, next) {
 var io = socketio.listen(server);
 io.sockets.on('connection', function (socket) {
   socket.on('sub-new-processes', function (data) {
-    processStore.addNewProcessListener(function (processObject) {
+    var listenerId = processStore.addNewProcessListener(function (processObject) {
       socket.emit('new-process', processObject);
+    });
+    socket.on('disconnect', function () {
+      processStore.removeNewProcessListener(listenerId);
     });
   });
   socket.on('sub-process', function (data) {
@@ -114,8 +117,11 @@ server.post({path: '/processes', name: 'createProcesses'}, function(req, res, ne
   var bpmnUrl = processObject.bpmnSourceURI;
 
   getURL(bpmnUrl, function (err, processXml) {
+    console.log("got bpmn");
     createProcess(processXml, processObject, function () {
+      console.log("process created");
       res.send(processObject);  
+      next();
     });
   });
 });
@@ -138,23 +144,26 @@ requirejs(["bpmn/Engine"], function (engineModule) {
 
 var processStore = (function() {
     var store = {};
-    var listeners = [];
+    var listeners = {}; 
     var ps = {};
     ps.addProcess = function (processObject) {
       store[processObject.id] = processObject;
       process.nextTick(function () {
-        var listenersLength = listeners.length;
-        for (var i=0; i < listenersLength; i++) {
-          listeners[i].call();
+        for (id in listeners) {
+          listeners[id].apply(ps, [processObject]);
         }
       });
     };
-
     ps.getProcess = function(id) {
       return store[id];
     };
-    ps.addNewProcessListener = function (cb) {
-      listeners.push(cb);
+    ps.addNewProcessListener = function(cb) {
+      var id = uuid.v4();
+      listeners[id] = cb;
+      return id;
+    };
+    ps.removeNewProcessListener = function(id) {
+      delete listeners[id];
     };
     return ps;
   }
@@ -192,9 +201,9 @@ function createProcess(processXml, processObject, cb) {
     }, 1);
 
     processObject.id = uuid.v4();
-
     processStore.addProcess(processObject);
-    cb();
+    console.log("calling callback")
+    cb.call();
 }
 
 
@@ -209,13 +218,13 @@ function getURL (url, cb) {
     client = http;
   }
   if (client) {
-    client.get(url, function(res) {
-      console.log("Got response: " + res.statusCode);
+    client.get(url, function(response) {
+      console.log("Got response: " + response.statusCode);
       var body = '';
-      res.on('data', function (chunk) {
+      response.on('data', function (chunk) {
         body += chunk;
       });
-      res.on('end', function () {
+      response.on('end', function () {
         cb(null, body);
       });
     }).on('error', function(e) {

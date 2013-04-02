@@ -1,7 +1,10 @@
 var assert = require("chai").assert
   , expect = require("chai").expect
   , util = require("util")
+  , io = require("socket.io-client")
   , restify = require('restify');
+
+var HOST = "http://0.0.0.0:8080";
 
 var processObject = {
   "id" : null,
@@ -24,8 +27,19 @@ var processObject = {
 };
 
 var client = restify.createJsonClient({
-  url: "http://0.0.0.0:8080"
-})
+  url: HOST
+});
+
+var socket = io.connect(HOST);
+var socketEvents = [];
+socket.on("connect", function () {
+  socket.emit("sub-new-processes", {});
+  socket.on("new-process", function (data) {
+    // console.log("new-process: " + util.inspect(data));
+    socketEvents.push(data);
+  });
+});
+
 
 describe('Manage a process', function(){
   describe('Create a process', function(){
@@ -54,6 +68,11 @@ describe('Manage a process', function(){
         expect(obj.id).to.equal(newId);
         done();
       });
+    });
+    it('should get a socket event for a new process', function(){
+      expect(socketEvents.length).to.equal(1);
+      var se = socketEvents.pop();
+      expect(newId).to.equal(se.id);     
     });
   });
 });
