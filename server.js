@@ -93,17 +93,20 @@ io.sockets.on('connection', function (socket) {
       processStore.removeNewProcessListener(listenerId);
     });
   });
-  socket.on('sub-process', function (processObject) {
-    var listenerId = processStore.addProcessEventListener(processObject.id, function (event) {
+  socket.on('sub-process', function (subData) {
+    var listenerId = processStore.addProcessEventListener(subData.processId, function (eventType, event) {
+      // if (event.activityDefinition.sequenceFlows) console.log(util.inspect(event.activityDefinition.sequenceFlows[0], { depth : 8 }));
+      console.log()
       var data = {
-        id : processObject.id,
         activityDefinitionId : event.activityDefinition.id,
         incomingSequenceFlowId : event.incomingSequenceFlowId
       };
-      socket.emit('process-event', data);
+      if (subData.eventType === undefined || subData.eventType == "all" || subData.eventType == eventType) {
+        socket.emit('process-event', data);
+      }
     });
     socket.on('disconnect', function () {
-      processStore.removeProcessEventListener(processObject.id, listenerId);
+      processStore.removeProcessEventListener(subData.processId, listenerId);
     });
   });
   socket.on('attach-listener', function (data) {
@@ -142,6 +145,13 @@ server.get({path: '/processes/:processId', name: 'getProcessById'}, function(req
   res.send(processObject);  
 });
 
+server.post({path: '/processes/:processId/signal', name: 'signalProcess'}, function(req, res, next) {
+  console.log(util.inspect(req.params));
+  var processObject = processStore.getProcess(req.params.processId);
+  var signal = req.body;
+  processObject.signal(signal.activityDefinitionId);
+  res.send(signal);  
+});
 server.listen(8080, function() {
 	console.log('%s listening at %s', server.name, server.url);
 });
@@ -186,9 +196,9 @@ var processStore = (function() {
     ex.removeProcessEventListener = function(processId, id) {
       delete processEventListeners[processId][id];
     };
-    ex.raiseProcessEvent = function(processId, event) {
+    ex.raiseProcessEvent = function(processId, eventType, event) {
       for (id in processEventListeners[processId]) {
-        processEventListeners[processId][id](event);
+        processEventListeners[processId][id](eventType, event);
       }
     };
     return ex;
@@ -199,17 +209,13 @@ function createProcess(processXml, processObject, cb) {
     var instance = Engine.startInstance(processXml, { }, [
       {
         "start" : function (execution) {
-          console.log("start: " + execution.activityDefinition.id);
-          console.log("incoming: " + execution.incomingSequenceFlowId);
+          processStore.raiseProcessEvent(processObject.id, "start", execution);
         },
         "take" : function (execution) {
-          console.log("take: " + execution.activityDefinition.id);
-          console.log("incoming: " + execution.incomingSequenceFlowId);
-          processStore.raiseProcessEvent(processObject.id, execution);
+          processStore.raiseProcessEvent(processObject.id, "take", execution);
         },
         "end" : function (execution) {
-          console.log("end: " + execution.activityDefinition.id);
-          console.log("incoming: " + execution.incomingSequenceFlowId);
+          processStore.raiseProcessEvent(processObject.id, "end", execution);
         }
       },
       {
@@ -234,12 +240,10 @@ function createProcess(processXml, processObject, cb) {
          }
       }
     ]);
-    var win = false;
-    var inter = setInterval( function () { 
-      instance.signal('guessNumber');
-      //instance.continue();
-      if (win) clearInterval(inter);
-    }, 1000);
+
+    processObject.signal = function (activityDefinitionId) {
+      instance.signal(activityDefinitionId);
+    };
 
     processObject.id = uuid.v4();
     processStore.addProcess(processObject);

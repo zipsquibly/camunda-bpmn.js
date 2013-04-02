@@ -38,9 +38,12 @@ socket.on("connect", function () {
   socket.on("new-process", function (processObject) {
     newProcessEvents.push(processObject);
     socket.on("process-event", function (processEvent) {
-      allProcessEvents.push(processEvent);
-    });
-    socket.emit("sub-process", processObject);
+        allProcessEvents.push(processEvent);
+      });
+    socket.emit("sub-process", {
+        processId: processObject.id,
+        eventType: "start" 
+      });
   });
 });
 
@@ -78,11 +81,29 @@ describe('Manage a process', function(){
       var se = newProcessEvents.pop();
       expect(newId).to.equal(se.id);     
     });
-    it('should get some process events', function (done) {
-      setTimeout(function () {
+    it('should get some process events when the process is signaled', function (done) {
+      var signal = { "activityDefinitionId" : "guessNumber" };
+      client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
+        expect(res.statusCode).to.equal(200);
         assert(allProcessEvents.length > 0, "Did not receive process events");
         done();
-      }, 1000);
+      });
+    });
+    it('should end if we keep signaling it to guess numbers', function (done) {
+      var signal = { "activityDefinitionId" : "guessNumber" };
+      var sigIt = function () {
+        client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
+          expect(res.statusCode).to.equal(200);
+        });
+      };
+      socket.on("process-event", function (processEvent) {
+        if (processEvent.activityDefinitionId == "guessNumber") {
+          sigIt();
+        } else if (processEvent.activityDefinitionId == "end") {
+          done();
+        }
+      }); 
+      sigIt();
     });
   });
 });
