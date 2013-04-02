@@ -153,7 +153,7 @@ var processStore = (function() {
     ps.getProcess = function(id) {
       return store[id];
     };
-    ps.addNewProcessListener(cb) {
+    ps.addNewProcessListener = function (cb) {
       listeners.push(cb);
     };
     return ps;
