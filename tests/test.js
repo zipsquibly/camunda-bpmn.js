@@ -94,7 +94,7 @@ describe('Manage a process', function(){
       });
     });
     it('should send the process its secret number', function (done) {
-      var signal = { "activityDefinitionId" : "generateNumber", "data" : { "secret" : Math.floor(Math.random() * 20) + 1} };
+      var signal = { "activityDefinitionId" : "generateNumber", "data" : { "secret" : Math.floor(Math.random() * 5) + 1} };
       client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
         if (err) throw(err);
         expect(res.statusCode).to.equal(200);
@@ -104,7 +104,7 @@ describe('Manage a process', function(){
     it('should end if we keep signaling it to guess numbers', function (done) {
       var sigIt = function () {
         cycles++;
-        var signal = { "activityDefinitionId" : "guessNumber", "data" : { "guess" : Math.floor(Math.random() * 20) + 1} };
+        var signal = { "activityDefinitionId" : "guessNumber", "data" : { "guess" : Math.floor(Math.random() * 5) + 1} };
         client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
           if (err) throw(err);
           expect(res.statusCode).to.equal(200);
