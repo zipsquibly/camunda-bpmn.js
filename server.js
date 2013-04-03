@@ -9,6 +9,7 @@ var restify = require('restify')
   , socketio = require('socket.io')
   , processStore = require('./src/node-engine/processStore')
   , processManager = require('./src/node-engine/processManager')
+  , fs = require('fs')
 ;
 
 // Creating GLOBALS to replace the window and DOMParser objects 
@@ -153,7 +154,7 @@ server.listen(8080, function() {
 /// UTILITIES
 
 function getURL (url, cb) {
-  console.log("getting: " + url);
+  log.trace("getUrl: " + url);
   var client = false;
   if (url.match(/^https:/)) {
     client = https;
@@ -162,7 +163,7 @@ function getURL (url, cb) {
   }
   if (client) {
     client.get(url, function(response) {
-      console.log("Got response: " + response.statusCode);
+      log.trace("response status code: " + response.statusCode);
       var body = '';
       response.on('data', function (chunk) {
         body += chunk;
@@ -170,9 +171,21 @@ function getURL (url, cb) {
       response.on('end', function () {
         cb(null, body);
       });
-    }).on('error', function(e) {
-      cb(e, null)
+    }).on('error', function(err) {
+      log.error("unable to http/s get bpmn file: " + url + " err: " + util.inspect(err));
+      cb(err, null)
     });
+  } else if (url.match(/^file:/)) {
+    var filepath = url.replace(/^file:\/\//, '');
+    console.log('f:' + filepath);
+    fs.readFile(filepath, 'utf8', function (err,data) {
+      if (err) {
+        log.error("unable to read bpmn file: " + filepath + " err: " + util.inspect(err));
+        cb({"exception" : true, "message" : err}, null);
+      }
+      cb(null, data);
+    });
+
   } else {
       cb({"exception" : true, "message" : "must be http or https URL"}, null);
   }
