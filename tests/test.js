@@ -11,10 +11,7 @@ var processObject = {
   "description" : "Number Guessing",
   "active" : true,
   "name" : "number-guess",
-  "bpmnSourceURI" : "https://raw.github.com/zipsquibly/camunda-bpmn.js/master/test/resources/number-guess.bpmn",
-  "startDateTime" : "2012-11-05T08:15:30-05:00",
-  "endDateTime" : "2012-11-05T08:15:30-05:00",
-  "lastActionDateTime" : "2012-11-05T08:15:30-05:00",
+  "bpmnSourceURI" : "file://test/resources/number-guess.bpmn",
   "context" : {
      "personId" : "5ac0eda6-97bb-11e2-a595-ef9861d0ea07",
      "patientId" : "1ac0eda6-97bb-11e2-a595-ef9861d0ea07",
@@ -57,6 +54,11 @@ describe('Manage a process', function(){
   describe('Create a process', function(){
     var newId = null;
     var cycles = 0;
+    it('should wait for the socket connection', function(done){
+      setTimeout(function() {
+        done();
+      }, 20);
+    });
     it('should create a valid process when I post', function(done){
       client.post("/processes", processObject, function(err, req, res, obj) {
         if (err) throw(err);
