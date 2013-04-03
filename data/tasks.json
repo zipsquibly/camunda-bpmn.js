@@ -1,0 +1,11 @@
+{ 
+    "generateNumber" : {   
+        "id" : "generateNumber",
+        "actions" : [
+            {   "uri" : "/api/generate-number",
+                "method" : "POST"
+            }
+        ]
+    }
+}
+

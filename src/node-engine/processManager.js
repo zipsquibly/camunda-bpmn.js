@@ -1,8 +1,11 @@
 var restify = require('restify')
-, Logger = require('bunyan')
-, util = require('util')
-, requirejs = require('requirejs')
-, uuid = require('uuid')
+  , Logger = require('bunyan')
+  , util = require('util')
+  , requirejs = require('requirejs')
+  , uuid = require('uuid')
+  , fs = require('fs')
+  , Engine = null
+  , TaskDb = null
 ;
 
 requirejs.config({
@@ -18,12 +21,25 @@ CAM = null; // require of engine creates global CAM
 
 DOMParser = require('xmldom').DOMParser;
 window = {
-DOMParser : DOMParser
+  DOMParser : DOMParser
 };
-var Engine = null;
 
 requirejs(["bpmn/Engine"], function (engineModule) {
-Engine = engineModule;
+  Engine = engineModule;
+});
+
+fs.readFile('data/tasks.json', 'utf8', function (err,data) {
+  if (err) {
+    throw err;
+  }
+  try {
+    TaskDb = JSON.parse(data);
+  } catch (err) {
+    console.log("FAIL TO PARSE: tasks.json")
+    console.log(util.inspect(err));
+  }
+  console.log("GOT CONFIG: " + util.inspect(TaskDb));
+
 });
 
 exports.createProcess = function(processXml, processObject, processStore, cb) {
