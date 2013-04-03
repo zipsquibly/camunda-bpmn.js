@@ -133,6 +133,7 @@ server.post({path: '/processes', name: 'createProcesses'}, function(req, res, ne
 
   getURL(bpmnUrl, function (err, processXml) {
     console.log("got bpmn");
+    processObject.bpmnXml = processXml;
     createProcess(processXml, processObject, function () {
       console.log("process created");
       res.send(processObject);  
@@ -218,24 +219,6 @@ function createProcess(processXml, processObject, cb) {
         "end" : function (execution) {
           processStore.raiseProcessEvent(processObject.id, "end", execution);
         }
-      },
-      {
-         id : "generateNumber",
-         "end" : function (execution) {
-              console.log("Secret is " + execution.parentExecution.variables.secret);
-         }
-      },
-      {
-         id : "guessNumber",
-         "end" : function (execution) {
-              console.log("Guess is " + execution.parentExecution.variables.guess);
-         }
-      },
-      {
-         id : "end",
-         "end" : function (execution) {
-           console.log("COMPLETE");
-         }
       }
     ]);
 

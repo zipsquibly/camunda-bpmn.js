@@ -4,7 +4,7 @@ var assert = require("chai").assert
   , io = require("socket.io-client")
   , restify = require('restify');
 
-var HOST = "http://0.0.0.0:8080";
+var HOST = "http://127.0.0.1:8080";
 
 var processObject = {
   "id" : null,
@@ -70,6 +70,7 @@ describe('Manage a process', function(){
         if (err) throw(err);
         expect(res.statusCode).to.equal(200);
         expect(obj.id).to.equal(newId);
+        assert(!!obj.bpmnXml, "No XML was received");
         done();
       });
     });
