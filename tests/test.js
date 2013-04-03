@@ -56,13 +56,16 @@ socket.on("connect", function () {
 describe('Manage a process', function(){
   describe('Create a process', function(){
     var newId = null;
+    var cycles = 0;
     it('should create a valid process when I post', function(done){
       client.post("/processes", processObject, function(err, req, res, obj) {
         if (err) throw(err);
         expect(res.statusCode).to.equal(200);
         expect(obj.id).to.not.equal(null);
         newId = obj.id;
-        done();
+        setTimeout(function () {
+          done();
+        }, 500);
       });
     });
     it('should find the process I just created', function(done){
@@ -71,7 +74,9 @@ describe('Manage a process', function(){
         expect(res.statusCode).to.equal(200);
         expect(obj.id).to.equal(newId);
         assert(!!obj.bpmnXml, "No XML was received");
-        done();
+        setTimeout(function () {
+          done();
+        }, 500);
       });
     });
     it('should get a socket event for a new process', function(){
@@ -98,6 +103,7 @@ describe('Manage a process', function(){
     });
     it('should end if we keep signaling it to guess numbers', function (done) {
       var sigIt = function () {
+        cycles++;
         var signal = { "activityDefinitionId" : "guessNumber", "data" : { "guess" : Math.floor(Math.random() * 20) + 1} };
         client.post("/processes/" + newId + "/signal", signal, function(err, req, res, obj) {
           if (err) throw(err);
@@ -108,6 +114,7 @@ describe('Manage a process', function(){
         if (processEvent.activityDefinitionId == "guessNumber") {
           sigIt();
         } else if (processEvent.eventType == "end" && processEvent.activityDefinitionId == "end") {
+          console.log(cycles + ' cycles were completed');
           done();
         }
       }); 
