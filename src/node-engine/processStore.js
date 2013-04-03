@@ -13,26 +13,32 @@ exports.addProcess = function (processObject) {
     }
   });
 };
+
 exports.getProcess = function(id) {
   return store[id];
 };
+
 exports.addNewProcessListener = function(cb) {
   var id = uuid.v4();
   listeners[id] = cb;
   return id;
 };
+
 exports.removeNewProcessListener = function(id) {
   delete listeners[id];
 };
+
 exports.addProcessEventListener = function(processId, cb) {
   console.log("adding process event listener: " + processId);
   var id = uuid.v4();
   processEventListeners[processId][id] = cb;
   return id;
 };
+
 exports.removeProcessEventListener = function(processId, id) {
   delete processEventListeners[processId][id];
 };
+
 exports.raiseProcessEvent = function(processId, eventType, event) {
   for (id in processEventListeners[processId]) {
     processEventListeners[processId][id](eventType, event);
