@@ -7,33 +7,22 @@ var restify = require('restify')
   , https = require('https')
   , uuid = require('uuid')
   , socketio = require('socket.io')
+  , processStore = require('./src/node-engine/processStore')
+  , processManager = require('./src/node-engine/processManager')
 ;
 
-requirejs.config({
-    //Use node's special variable __dirname to
-    //get the directory containing this file.
-    //Useful if building a library that will
-    //be used in node but does not require the
-    //use of node outside
-    baseUrl: __dirname + '/src/',
-    name: 'bpmn',
-    //Pass the top-level main.js/index.js require
-    //function to requirejs so that node modules
-    //are loaded relative to the top-level JS file.
-    nodeRequire: require
-});
-
 // Creating GLOBALS to replace the window and DOMParser objects 
-// you would get in a browser
+// you would get in a browser (since bpmn assumes browser)
 
 CAM = null; // require of engine creates global CAM
-
 DOMParser = require('xmldom').DOMParser;
 window = {
   DOMParser : DOMParser
 };
-var Engine = null;
+/// END global hacks
 
+
+/// BUNYAN config
 var log = new Logger({
   name: 'camunda-bpmn',
   level: process.env.LOG_LEVEL || 'info',
@@ -61,10 +50,10 @@ var server = restify.createServer({
 });
 
 server.use(restify.acceptParser(server.acceptable));
-server.use(restify.dateParser());
+server.use(restify.dateParser()); 
 server.use(restify.queryParser());
-server.use(restify.bodyParser({ mapParams: false }));
-server.use(restify.throttle({
+server.use(restify.bodyParser({ mapParams: false })); // keep body and params seperate
+server.use(restify.throttle({  // this sounds cool
   burst: 100,
   rate: 50,
   ip: true, // throttle based on source ip address
@@ -83,6 +72,7 @@ server.pre(function (request, response, next) {
 });
 
 //// Socket.IO SETUP ///////
+
 var io = socketio.listen(server);
 io.sockets.on('connection', function (socket) {
   socket.on('subscribe-new-process-events', function (data) {
@@ -134,7 +124,7 @@ server.post({path: '/processes', name: 'createProcesses'}, function(req, res, ne
   getURL(bpmnUrl, function (err, processXml) {
     console.log("got bpmn");
     processObject.bpmnXml = processXml;
-    createProcess(processXml, processObject, function () {
+    processManager.createProcess(processXml, processObject, processStore, function () {
       console.log("process created");
       res.send(processObject);  
       next();
@@ -159,84 +149,6 @@ server.listen(8080, function() {
 });
 
 //// END REST API ///
-
-requirejs(["bpmn/Engine"], function (engineModule) {
-  Engine = engineModule;
-});
-
-var processStore = (function() {
-    var store = {};
-    var listeners = {}; 
-    var processEventListeners = {}; 
-    var ex = {};
-    ex.addProcess = function (processObject) {
-      store[processObject.id] = processObject;
-      processEventListeners[processObject.id] = {};
-      process.nextTick(function () {
-        for (id in listeners) {
-          listeners[id].apply(ex, [processObject]);
-        }
-      });
-    };
-    ex.getProcess = function(id) {
-      return store[id];
-    };
-    ex.addNewProcessListener = function(cb) {
-      var id = uuid.v4();
-      listeners[id] = cb;
-      return id;
-    };
-    ex.removeNewProcessListener = function(id) {
-      delete listeners[id];
-    };
-    ex.addProcessEventListener = function(processId, cb) {
-      console.log("adding process event listener: " + processId);
-      var id = uuid.v4();
-      processEventListeners[processId][id] = cb;
-      return id;
-    };
-    ex.removeProcessEventListener = function(processId, id) {
-      delete processEventListeners[processId][id];
-    };
-    ex.raiseProcessEvent = function(processId, eventType, event) {
-      for (id in processEventListeners[processId]) {
-        processEventListeners[processId][id](eventType, event);
-      }
-    };
-    return ex;
-  }
-)();
-
-function createProcess(processXml, processObject, cb) {
-    var instance = Engine.startInstance(processXml, { }, [
-      {
-        "start" : function (execution) {
-          processStore.raiseProcessEvent(processObject.id, "start", execution);
-        },
-        "take" : function (execution) {
-          processStore.raiseProcessEvent(processObject.id, "take", execution);
-        },
-        "end" : function (execution) {
-          processStore.raiseProcessEvent(processObject.id, "end", execution);
-        }
-      }
-    ]);
-
-    processObject.signal = function (activityDefinitionId, data) {
-      if (data) {
-        for (var property in data) {
-          instance.variables[property] = data[property];
-        }
-      }
-      instance.signal(activityDefinitionId);
-    };
-
-    processObject.id = uuid.v4();
-    processStore.addProcess(processObject);
-    console.log("calling callback")
-    cb.call();
-}
-
 
 /// UTILITIES
 
